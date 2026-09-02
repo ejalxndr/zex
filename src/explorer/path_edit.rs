@@ -53,7 +53,18 @@ fn path_completions(text: &str) -> Vec<PathBuf> {
         .map(|entry| entry.path())
         .collect();
 
-    matches.sort();
+    matches.sort_by(|a, b| {
+        let name = |p: &Path| {
+            p.file_name()
+                .map(|n| n.to_string_lossy().to_lowercase())
+                .unwrap_or_default()
+        };
+        let (an, bn) = (name(a), name(b));
+        an.eq(&prefix_lower)
+            .cmp(&bn.eq(&prefix_lower))
+            .reverse()
+            .then(an.cmp(&bn))
+    });
     matches.truncate(MAX_PATH_SUGGESTIONS);
     matches
 }
@@ -98,15 +109,6 @@ impl Explorer {
         let Some(editing) = self.editing_path.take() else {
             return;
         };
-
-        if let Some(path) = editing
-            .selected_suggestion
-            .and_then(|ix| editing.suggestions.get(ix).cloned())
-        {
-            self.op_error = None;
-            self.navigate_or_drill(path, cx);
-            return;
-        }
 
         let text = editing.input.read(cx).value().to_string();
         let trimmed = text.trim();
@@ -193,14 +195,18 @@ impl Explorer {
         };
         let chosen = editing
             .selected_suggestion
+            .or_else(|| (!editing.suggestions.is_empty()).then_some(0))
             .and_then(|ix| editing.suggestions.get(ix))
-            .or_else(|| editing.suggestions.first())
             .cloned();
         let Some(chosen) = chosen else {
             return;
         };
+        let current = editing.input.read(cx).value().to_string();
         let mut text = chosen.to_string_lossy().into_owned();
         text.push('/');
+        if text == current {
+            return;
+        }
         editing
             .input
             .clone()
@@ -214,8 +220,12 @@ impl Explorer {
         let text = editing.input.read(cx).value().to_string();
         let suggestions = path_completions(&text);
         if let Some(editing) = &mut self.editing_path {
+            editing.selected_suggestion = if suggestions.is_empty() {
+                None
+            } else {
+                Some(0)
+            };
             editing.suggestions = suggestions;
-            editing.selected_suggestion = None;
         }
         cx.notify();
     }

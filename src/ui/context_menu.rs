@@ -130,6 +130,31 @@ pub(crate) fn file_row_menu(
     let is_multi = explorer.read(cx).selected.len() > 1;
     let is_dir = path.is_dir();
 
+    if !is_multi {
+        let open_explorer = explorer.clone();
+        let open_path = path.clone();
+        menu = menu.item(
+            PopupMenuItem::new("Open").on_click(move |_, _window, cx| {
+                open_explorer.update(cx, |explorer, cx| {
+                    explorer.open_entry(&open_path, cx);
+                });
+            }),
+        );
+
+        if !is_dir {
+            let open_with_explorer = explorer.clone();
+            let open_with_path = path.clone();
+            menu = menu.item(
+                PopupMenuItem::new("Open With\u{2026}").on_click(move |_, window, cx| {
+                    open_with_explorer.update(cx, |explorer, cx| {
+                        explorer.begin_open_with(open_with_path.clone(), window, cx);
+                    });
+                }),
+            );
+        }
+        menu = menu.separator();
+    }
+
     if !is_multi && is_dir {
         let open_tab_explorer = explorer.clone();
         let open_tab_path = path.clone();
@@ -231,6 +256,8 @@ pub fn search_result_menu(
 
     let open_explorer = explorer.clone();
     let open_path = path.clone();
+    let open_with_explorer = explorer.clone();
+    let open_with_path = path.clone();
     let reveal_explorer = explorer.clone();
     let reveal_path_target = path.clone();
     let copy_explorer = explorer.clone();
@@ -248,6 +275,13 @@ pub fn search_result_menu(
                     explorer.op_error = Some(format!("Couldn't open {}: {err}", open_path.display()));
                     cx.notify();
                 }
+            });
+        }),
+    )
+    .item(
+        PopupMenuItem::new("Open With\u{2026}").on_click(move |_, window, cx| {
+            open_with_explorer.update(cx, |explorer, cx| {
+                explorer.begin_open_with(open_with_path.clone(), window, cx);
             });
         }),
     )

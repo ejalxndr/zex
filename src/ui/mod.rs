@@ -3,6 +3,7 @@ pub mod column_header;
 pub mod context_menu;
 pub mod disk_usage;
 pub mod file_list;
+pub mod open_with_dialog;
 pub mod path_bar;
 pub mod popup_menu;
 pub mod properties_window;

@@ -20,7 +20,7 @@ use crate::ui::popup_menu::ContextMenuExt;
 use crate::ui::scrollbar::Scrollbar;
 use crate::ui::text_input::{Escape, SubmitEnter, TextInput as Input};
 use crate::ui::tooltip::Tooltip;
-use crate::ui::{bulk_progress, warning_dialog};
+use crate::ui::{bulk_progress, open_with_dialog, warning_dialog};
 
 enum SearchRow {
     FileHeader { path: PathBuf, count: usize },
@@ -68,6 +68,7 @@ pub fn render(explorer: &Explorer, window: &mut Window, cx: &Context<Explorer>) 
         .child(render_body(explorer, state, entity, window, cx))
         .children(warning_dialog::render(explorer, cx))
         .children(bulk_progress::render(explorer, cx))
+        .children(open_with_dialog::render(explorer, cx))
 }
 
 fn render_header(_explorer: &Explorer, state: &SearchState, cx: &Context<Explorer>) -> impl IntoElement {

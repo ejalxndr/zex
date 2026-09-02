@@ -7,6 +7,7 @@ pub mod git_ops;
 mod history;
 mod navigation;
 mod new_entry;
+pub mod open_with;
 mod path_edit;
 pub mod properties;
 mod rename;
@@ -33,7 +34,7 @@ use crate::keys;
 use crate::settings::{DiskUsageSettings, GitSettings, SearchSettings};
 use crate::theme;
 use crate::ui;
-use crate::ui::{bulk_progress, file_list, path_bar, status_bar, warning_dialog};
+use crate::ui::{bulk_progress, file_list, open_with_dialog, path_bar, status_bar, warning_dialog};
 
 use bulk_op::BulkOpState;
 use columns::{
@@ -115,6 +116,7 @@ pub struct Explorer {
     pub disk_usage: Option<disk_usage::DiskUsageState>,
     pub search_settings: SearchSettings,
     pub search: Option<search::SearchState>,
+    pub open_with: Option<open_with::OpenWithState>,
 }
 
 impl Explorer {
@@ -172,6 +174,7 @@ impl Explorer {
             disk_usage: None,
             search_settings,
             search: None,
+            open_with: None,
         };
         this.enter_directory(cx);
         this
@@ -328,5 +331,6 @@ impl Explorer {
             .child(status_bar::render(self, cx))
             .children(warning_dialog::render(self, cx))
             .children(bulk_progress::render(self, cx))
+            .children(open_with_dialog::render(self, cx))
     }
 }
