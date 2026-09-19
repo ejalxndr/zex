@@ -15,6 +15,7 @@ use window_root::WindowRoot;
 pub fn run(settings: Settings, startup: Startup) {
     let icon_theme_state = icon_theme::resolve(&settings);
     let show_hidden_files = settings.show_hidden_files.unwrap_or(false);
+    let image_previews = settings.image_previews.unwrap_or(true);
     let sidebar_visible = settings.sidebar_visible.unwrap_or(true);
     let sidebar_entries = settings.sidebar.clone();
     let git_settings = settings.git.clone();
@@ -29,6 +30,7 @@ pub fn run(settings: Settings, startup: Startup) {
             ui::popup_menu::init(cx);
             ui::path_bar::init(cx);
             cx.set_global(icon_theme_state);
+            cx.set_global(ui::thumbnail::ThumbnailCache::new(image_previews));
             theme::init(color_theme::resolve(&settings.theme, cx));
 
             let default_font = UiFont::default();

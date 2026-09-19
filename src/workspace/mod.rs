@@ -25,6 +25,7 @@ use tab_drag::{DragHover, SplitZone, TabDragPayload};
 pub const MIN_SIDEBAR_WIDTH: f32 = 140.0;
 pub const MAX_SIDEBAR_WIDTH: f32 = 480.0;
 pub const DEFAULT_SIDEBAR_WIDTH: f32 = 300.0;
+pub const FORCE_TAB_STRIP: bool = true;
 
 #[derive(Clone, Debug)]
 pub struct SplitResizeState {
@@ -410,7 +411,7 @@ impl Render for Workspace {
 
         let leaves = self.root.leaves();
         let total_tabs: usize = leaves.iter().map(|pane| pane.read(cx).tabs.len()).sum();
-        let show_tab_strip = total_tabs > 1;
+        let show_tab_strip = FORCE_TAB_STRIP || total_tabs > 1;
         for pane in &leaves {
             pane.update(cx, |pane, cx| {
                 if pane.show_tab_strip != show_tab_strip {

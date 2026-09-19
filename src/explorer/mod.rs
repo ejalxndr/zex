@@ -9,6 +9,7 @@ mod navigation;
 mod new_entry;
 pub mod open_with;
 mod path_edit;
+mod preview;
 pub mod properties;
 mod rename;
 pub mod search;
@@ -22,7 +23,7 @@ use std::path::{Path, PathBuf};
 
 use gpui::{
     Context, Entity, FocusHandle, IntoElement, MouseButton, MouseDownEvent, NavigationDirection,
-    Render, SharedString, Task, UniformListScrollHandle, Window, div, prelude::*,
+    Render, SharedString, Task, UniformListScrollHandle, Window, div, prelude::*, px,
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -34,14 +35,16 @@ use crate::keys;
 use crate::settings::{DiskUsageSettings, GitSettings, SearchSettings};
 use crate::theme;
 use crate::ui;
-use crate::ui::{bulk_progress, file_list, open_with_dialog, path_bar, status_bar, warning_dialog};
+use crate::ui::{
+    bulk_progress, file_list, open_with_dialog, path_bar, preview_pane, status_bar, warning_dialog,
+};
 
 use bulk_op::BulkOpState;
 use columns::{
     ColumnResizeDrag, ColumnVisibility as ColumnVisibilityState, ColumnWidths, SortColumn,
     SortDirection,
 };
-use drag::ScrollbarDrag;
+use drag::{ScrollbarDrag, WidthResizeDrag};
 use history::History;
 use new_entry::NewEntryState;
 use path_edit::PathEditState;
@@ -117,6 +120,9 @@ pub struct Explorer {
     pub search_settings: SearchSettings,
     pub search: Option<search::SearchState>,
     pub open_with: Option<open_with::OpenWithState>,
+    pub preview_dismissed: Option<PathBuf>,
+    pub preview_width: f32,
+    pub preview_resize_drag: Option<WidthResizeDrag>,
 }
 
 impl Explorer {
@@ -175,6 +181,9 @@ impl Explorer {
             search_settings,
             search: None,
             open_with: None,
+            preview_dismissed: None,
+            preview_width: preview_pane::DEFAULT_WIDTH,
+            preview_resize_drag: None,
         };
         this.enter_directory(cx);
         this
@@ -231,6 +240,8 @@ impl Render for Explorer {
 
 impl Explorer {
     fn render_browser(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let preview = preview_pane::render(self, cx);
+
         div()
             .id("zex-root")
             .font_weight(cx.global::<theme::UiFont>().weight)
@@ -327,7 +338,24 @@ impl Explorer {
                             .child("×"),
                     )
             }))
-            .child(file_list::render(self, cx))
+            .child(
+                div()
+                    .flex()
+                    .flex_row()
+                    .flex_1()
+                    .w_full()
+                    .min_h(px(0.0))
+                    .overflow_hidden()
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .flex_1()
+                            .min_w(px(0.0))
+                            .child(file_list::render(self, cx)),
+                    )
+                    .children(preview),
+            )
             .child(status_bar::render(self, cx))
             .children(warning_dialog::render(self, cx))
             .children(bulk_progress::render(self, cx))

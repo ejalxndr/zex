@@ -10,6 +10,7 @@ pub struct Settings {
     pub ui_font_size: Option<f32>,
     pub ui_font_weight: Option<f32>,
     pub show_hidden_files: Option<bool>,
+    pub image_previews: Option<bool>,
     pub sidebar_visible: Option<bool>,
     #[serde(default)]
     pub sidebar: Vec<SidebarItem>,

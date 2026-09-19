@@ -17,6 +17,7 @@ use crate::ui::context_menu;
 use crate::ui::popup_menu::ContextMenuExt;
 use crate::ui::scrollbar::Scrollbar;
 use crate::ui::text_input::{Escape, TextInput as Input};
+use crate::ui::thumbnail;
 use gpui::{
     AnyElement, Context, DevicePixels, Div, DragMoveEvent, Entity, IntoElement, MouseButton,
     MouseDownEvent, MouseUpEvent, Render, Stateful, Window, div, prelude::*, px, uniform_list,
@@ -351,7 +352,8 @@ fn render_dir(explorer: &Explorer, cx: &Context<Explorer>) -> AnyElement {
                                             format_size(entry.size)
                                         };
                                         let modified_text = format_modified(entry.modified);
-                                        let icon = icon_theme::svg_icon_for(&entry, cx);
+                                        let icon = thumbnail::icon_element(&entry, px(16.0), cx)
+                                            .unwrap_or_else(|| icon_theme::svg_icon_for(&entry, cx));
                                         let path = entry.path.clone();
                                         let right_click_path = path.clone();
                                         let widths = explorer.column_widths;

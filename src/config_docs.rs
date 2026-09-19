@@ -80,6 +80,18 @@ standard CSS-style numeric font weights.",
 runtime with Ctrl-H regardless of this setting.",
     },
     ConfigDoc {
+        key: "image_previews",
+        section: "General",
+        summary: "Show image thumbnails and the click-to-preview pane.",
+        type_hint: "bool",
+        default: "true",
+        body: "When enabled, entries for image files (png, jpg, jpeg, jfif, gif, bmp, webp, \
+ico, tiff, tif, qoi, tga) render a small thumbnail of the image itself instead of the \
+generic icon, and selecting a single image opens a preview pane on the right edge of the \
+window. Thumbnails are generated in the background as rows come into view and cached in \
+memory. Files larger than 32 MB are left with the generic icon.",
+    },
+    ConfigDoc {
         key: "sidebar",
         section: "Sidebar",
         summary: "Pinned locations and sections shown in the sidebar.",

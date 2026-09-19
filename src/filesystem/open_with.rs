@@ -33,6 +33,12 @@ pub fn launch(path: &Path, app: &DesktopApp) -> std::io::Result<()> {
     spawn_detached(command)
 }
 
+pub fn open_paths_with(binary: &str, paths: &[PathBuf]) -> std::io::Result<()> {
+    let mut command = std::process::Command::new(binary);
+    command.args(paths);
+    spawn_detached(command)
+}
+
 fn find_terminal_emulator() -> Option<String> {
     if let Ok(term) = std::env::var("TERMINAL")
         && !term.is_empty()

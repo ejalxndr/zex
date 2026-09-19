@@ -54,6 +54,16 @@ impl Explorer {
         cx.notify();
     }
 
+    pub fn open_in_zeditor(&mut self, paths: Vec<PathBuf>, cx: &mut Context<Self>) {
+        if paths.is_empty() {
+            return;
+        }
+        if let Err(err) = open_with::open_paths_with("zeditor", &paths) {
+            self.op_error = Some(format!("Couldn't open Zed: {err}"));
+            cx.notify();
+        }
+    }
+
     pub fn cancel_open_with(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         if self.open_with.take().is_some() {
             window.focus(&self.focus_handle);

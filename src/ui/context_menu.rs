@@ -152,8 +152,26 @@ pub(crate) fn file_row_menu(
                 }),
             );
         }
-        menu = menu.separator();
     }
+
+    {
+        let zed_explorer = explorer.clone();
+        let zed_path = path.clone();
+        menu = menu.item(
+            PopupMenuItem::new("Open in Zeditor").on_click(move |_, _window, cx| {
+                zed_explorer.update(cx, |explorer, cx| {
+                    let paths: Vec<PathBuf> = if explorer.selected.len() > 1 {
+                        explorer.selected.iter().cloned().collect()
+                    } else {
+                        vec![zed_path.clone()]
+                    };
+                    explorer.open_in_zeditor(paths, cx);
+                });
+            }),
+        );
+    }
+
+    menu = menu.separator();
 
     if !is_multi && is_dir {
         let open_tab_explorer = explorer.clone();
@@ -258,6 +276,8 @@ pub fn search_result_menu(
     let open_path = path.clone();
     let open_with_explorer = explorer.clone();
     let open_with_path = path.clone();
+    let zed_explorer = explorer.clone();
+    let zed_path = path.clone();
     let reveal_explorer = explorer.clone();
     let reveal_path_target = path.clone();
     let copy_explorer = explorer.clone();
@@ -282,6 +302,13 @@ pub fn search_result_menu(
         PopupMenuItem::new("Open With\u{2026}").on_click(move |_, window, cx| {
             open_with_explorer.update(cx, |explorer, cx| {
                 explorer.begin_open_with(open_with_path.clone(), window, cx);
+            });
+        }),
+    )
+    .item(
+        PopupMenuItem::new("Open in Zeditor").on_click(move |_, _window, cx| {
+            zed_explorer.update(cx, |explorer, cx| {
+                explorer.open_in_zeditor(vec![zed_path.clone()], cx);
             });
         }),
     )
@@ -457,8 +484,18 @@ fn empty_space_menu(
     let properties_explorer = explorer.clone();
     let undo_explorer = explorer.clone();
     let redo_explorer = explorer.clone();
+    let open_zed_explorer = explorer.clone();
 
     let menu = menu
+        .item(
+            PopupMenuItem::new("Open in Zeditor").on_click(move |_, _window, cx| {
+                open_zed_explorer.update(cx, |explorer, cx| {
+                    let dir = explorer.current_dir().to_path_buf();
+                    explorer.open_in_zeditor(vec![dir], cx);
+                });
+            }),
+        )
+        .separator()
         .item(
             PopupMenuItem::new(match undo_label {
                 Some(label) => format!("Undo {label}"),
